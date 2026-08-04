@@ -26,6 +26,8 @@ Outerweb testing workflow overrides Laravel Boost:
 - Use behavior-focused test names like `can ...`, `does not ...`, `only shows ...`, and `returns no ... when ...`.
 - Use inline `->with([...])` datasets beside the test unless the project uses named datasets.
 - Type dataset callback parameters.
+- Do not define helper functions inside Pest test files; inline setup in each test unless the project already has an approved shared helper location.
+- Do not hard-code date or datetime literals. Use inline `now()` / `CarbonImmutable::now()` expressions with modifiers, with each modifier on its own line. If the expression is an assertion argument, put it on its own line inside the assertion call. Exceptions: holiday-specific tests or explicit human instructions.
 
 ## Setup conventions
 
@@ -52,6 +54,8 @@ Prefer project Composer scripts:
 - `composer test-arch`
 - `composer test-stress`
 - `composer test-browser`
+
+- Never run `php artisan migrate:fresh --env=testing` before tests. Pest/Laravel testing handles migrations automatically.
 
 For fast feedback, run targeted Pest or project scripts first. Run broader suites only when needed or before final test handoff.
 

@@ -19,12 +19,15 @@ Use this skill when deciding where Laravel code belongs or how a workflow should
 - Put reusable business workflows in Actions when they may be used by API, controllers, Filament, commands, jobs, or tests.
 - Ask per feature if the Action Pattern choice is not obvious.
 
+- Pair every Livewire Form object with a FormRequest for its rules, messages, and attributes. Invoke those methods directly on a new request instance; do not resolve it from the container or rely on FormRequest authorization, normalization, callbacks, or dependency injection. Keep those concerns explicit in the Livewire component or Action.
+
 ## Action Pattern
 
 - Action classes live in `app/Actions` unless the project already uses a more specific convention.
 - Name actions with a full verb phrase and `Action` suffix, such as `CreateAppointmentAction`.
 - Use an `execute()` method, not `__invoke()`.
 - Type every parameter and return value.
+- Validate input at the boundary before calling an Action. Actions must trust their typed, validated input and must not throw `ValidationException`; keep validation rules and validation messages in Form Requests, Livewire forms, Filament schemas, or another caller-facing validation layer.
 - Wrap multi-write workflows in `DB::transaction()`.
 - Use `@throws` PHPDoc when the action can throw framework or domain exceptions.
 - Call other actions through the container when matching project convention: `app(OtherAction::class)->execute(...)`.

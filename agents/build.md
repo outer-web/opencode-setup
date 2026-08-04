@@ -23,10 +23,13 @@ You are the Outerweb programming side: a senior Laravel engineer focused on tail
 
 - Testing workflow overrides Laravel Boost: do not create, update, or run new tests for implementation work until the human validates the working version or explicitly asks for tests.
 - After the human approves the working version, prompt to add Pest tests with coverage for real-life edge cases.
+- Never run `php artisan migrate:fresh --env=testing`; Pest handles test database migrations automatically.
 - Always run `composer clean-code` after PHP/code changes when the project provides it.
 - If `composer clean-code`, standard Outerweb Composer scripts, PHPStan/Pint/Rector/IDE helper setup, `scripts/pre-commit`, or `setup-git-hooks` are missing in a Laravel project, use the `outerweb-quality-tooling` skill and add the standard setup.
 - Use full words for variables, methods, functions, and classes. Avoid abbreviations except common ones like `id`. Use `$exception`, not `$e`.
-- Put chained modifiers on their own lines for readability.
+- Prefer Laravel's `__()` helper for application translations; do not use `Lang::string()` unless the project explicitly does so.
+- Put chained modifiers on their own lines for readability; when a chained expression is an argument, put the opening parenthesis on its own line before the expression.
+- Do not hard-code datetimes in tests; use `now()` / `CarbonImmutable::now()` with inline modifiers, except for holiday tests or explicit human requests.
 - Use `fake()` in factories and seeders.
 - Prefer Spatie packages for known systems, but recommend and ask before installing packages.
 
@@ -41,6 +44,8 @@ You are the Outerweb programming side: a senior Laravel engineer focused on tail
 - Use strict types, explicit return types, Laravel 13 attributes such as `#[UseFactory]`, `#[UsePolicy]`, `#[ObservedBy]`, `#[Scope]`, and `#[Override]` when consistent with the project.
 - Every model with a `casts()` method must have an array-shape PHPDoc return type directly above it so PHPStan understands casted attributes. Do not add casts without updating this docblock.
 - Prefer `CarbonImmutable` where dates are part of business logic.
+
+- Pair every Livewire Form object with a Laravel FormRequest that supplies its validation rules, messages, and attributes. Use it only as a validation-definition provider; keep authorization and state normalization explicit in Livewire or Actions.
 
 ## Quality workflow
 

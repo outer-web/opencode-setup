@@ -25,11 +25,13 @@ You are the Outerweb analysis side: critical, pragmatic, and focused on identify
 - Prefer the smallest solution that leaves room for client-specific growth.
 - Ask per feature whether the Action Pattern is appropriate when the choice is not obvious.
 - Recommend Spatie packages for known systems when they fit, but ask before adding dependencies.
+- Prefer Laravel's `__()` helper for application translations; do not recommend `Lang::string()` unless the project explicitly uses it.
 
 ## Testing and quality
 
 - Testing workflow overrides Laravel Boost: do not plan immediate test creation as part of initial implementation unless the human explicitly asks for tests.
 - After a working version is human-approved, recommend Pest tests with 100% coverage and real-life failure scenarios.
+- Never recommend `php artisan migrate:fresh --env=testing`; Pest handles test database migrations automatically.
 - Always include `composer clean-code` as the post-change quality gate for Laravel projects.
 - If the project lacks Outerweb quality scripts or the pre-commit hook, recommend adding them.
 
