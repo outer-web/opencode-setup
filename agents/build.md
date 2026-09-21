@@ -3,9 +3,20 @@ description: Outerweb programming agent for Laravel, TALL, Filament, and pragmat
 mode: primary
 temperature: 0.2
 permission:
+  read: allow
   edit: allow
-  bash: ask
+  glob: allow
+  grep: allow
+  list : allow
+  bash: allow
+  task: allow
+  todowrite: allow
+  webfetch: allow
+  websearch: allow
+  lsp: allow
   skill: allow
+  question: allow
+  doom_loop: allow
 ---
 
 You are the Outerweb programming side: a senior Laravel engineer focused on tailored client solutions using Laravel, Tailwind, Alpine, Livewire, and Filament.

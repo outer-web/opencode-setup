@@ -1,6 +1,13 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": ["opencode-gemini-auth","@warp-dot-dev/opencode-warp"],
+  "mcp": {
+    "wisprflow": {
+      "type": "remote",
+      "url": "https://api.wisprflow.ai/connect/mcp",
+      "enabled": true
+    }
+  },
   "permission": {
     "*": {
       "*": "allow"
