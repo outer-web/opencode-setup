@@ -1,6 +1,6 @@
 ---
 name: outerweb-golden-examples
-description: Use when the user asks for Outerweb golden examples, structural examples, preferred code shape, or when implementing Actions, models, policies, factories, seeders, or Filament resources and examples would improve consistency.
+description: Use when the user asks for Outerweb golden examples, structural examples, preferred code shape, or when implementing Actions, models, policies, factories, seeders, Filament artifacts, or Livewire forms and examples would improve consistency.
 license: MIT
 metadata:
   owner: Outerweb
@@ -10,28 +10,28 @@ metadata:
 
 Use this skill to load concise structural examples of code Outerweb likes.
 
-These examples are sanitized from real project style. They preserve shape, formatting, and conventions, not business logic.
+These are structural references, not project requirements or ready-to-copy implementations.
 
 ## Available references
 
-- `reference/action.md`: Action class with `execute()` and transaction boundary.
-- `reference/filament-resource.md`: Thin Filament resource delegating to form, infolist, and table classes.
-- `reference/filament-table.md`: Filament table with columns, filters, actions, query modification, and sorting.
-- `reference/filament-form.md`: Filament form schema with translated labels and chained modifiers.
-- `reference/filament-infolist.md`: Filament infolist with callout, section, and entries.
-- `reference/policy.md`: Policy using `?Authenticatable $authenticatable` and tenant-style access checks.
-- `reference/model.md`: Eloquent model with attributes, relations, scopes, and casts PHPDoc.
-- `reference/factory.md`: Factory using `fake()`, relationships, and explicit defaults.
-- `reference/seeder.md`: Seeder using factories, cursors, and realistic linked data.
+- `reference/action.md`: Structural Action walkthrough covering typed `execute()` boundaries and conditional transactions; no copy-ready class.
+- `reference/livewire-form.md`: Non-Filament Livewire form with FormRequest validation metadata; use only with compatible installed versions and project conventions.
+- `reference/filament-resource.md`: Version-sensitive split resource delegating to form and table classes; add an infolist only when the feature and installed API warrant it.
+- `reference/filament-table.md`: Version-sensitive split-table sketch with columns and a filter, plus guidance on optional actions, query modification, and sorting.
+- `reference/filament-form.md`: Version-sensitive Filament form schema with labels and chained modifiers.
+- `reference/filament-infolist.md`: Version-sensitive Filament infolist with callout, section, and entries.
+- `reference/policy.md`: Illustrative single-auth policy; choose principal typing and guest access from the project's actual auth topology and authorization entry points.
+- `reference/model.md`: Eloquent model with conditional attribute metadata, relations, scopes, and casts PHPDoc.
+- `reference/factory.md`: Factory with `fake()`, relationships, and defaults; enum helpers only when available.
+- `reference/seeder.md`: Seeder with factories and linked data; cursor iteration only when appropriate.
 
 ## How to use examples
 
-- Copy structure, not names or domain logic.
-- Match the target project's existing namespace and conventions.
-- Keep chained modifiers on new lines.
-- Keep full words in variables and method names.
-- Preserve PHPStan-friendly PHPDoc where shown.
-- When examples conflict with a project-local pattern, follow the project-local pattern.
+- Load only the reference matching the artifact being changed.
+- Treat code, domain, paths, auth topology, locale helpers, and package APIs as illustrative, not defaults.
+- Copy structure only where the approved feature, maintained project guidance and conventions, installed versions, and version-matched documentation permit. Project evidence takes precedence over examples.
+- Examples do not authorize extra scope, dependencies, tooling, or tests.
+- For detailed decisions, use `outerweb-laravel-architecture`, `outerweb-model-lifecycle`, or `outerweb-filament-admin` as applicable.
 
 ## Maintenance
 

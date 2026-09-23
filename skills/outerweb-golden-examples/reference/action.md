@@ -2,53 +2,16 @@
 
 ## When to use
 
-Use this shape for reusable business workflows that may be called from Filament, controllers, commands, jobs, APIs, or tests.
+Use this structure when a named domain operation merits an Action: it is reused across entry points, coordinates domain changes or external effects, owns atomicity or concurrency, or follows an established project convention. A single-model pass-through does not need an Action just to match an example.
 
-## Pattern to copy
+## Structural walkthrough
 
-- `declare(strict_types=1);`
-- `app/Actions` namespace unless project-specific structure differs.
-- Full verb phrase class name ending in `Action`.
-- Public `execute()` method with typed parameters and return value.
-- Transaction boundary around state changes.
-- Return the changed domain model or value.
+- The project controls the Action's location, namespace, name, suffix, invocation, and dependency resolution. Use `declare(strict_types=1);` in its PHP file.
+- An authorized caller validates and normalizes input at its caller-facing boundary, then invokes a public `execute()` with typed, already validated input. Type every parameter and the result (including `: void` when nothing is returned); return a meaningful domain model or value only when the caller needs one.
+- Inside the operation, enforce domain invariants and coordinate the actual domain work across the necessary collaborators. Do not use `ValidationException` as a substitute for boundary validation or authorization.
+- Use a transaction only when atomicity, locking, or a protected transition requires one, and keep its boundary as narrow as the workflow permits. Place external effects according to that workflow's consistency requirements, not automatically inside a transaction.
+- Add `@throws` PHPDoc when the operation can throw framework or domain exceptions, not as a blanket template.
 
-## Do not copy
+## Before adapting
 
-- Domain names from this example.
-- State transition classes unless the target project uses the same state machine.
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Actions;
-
-use App\Models\Record;
-use App\States\Record\Archived;
-use Illuminate\Support\Facades\DB;
-use Throwable;
-
-class ArchiveRecordAction
-{
-    /**
-     * @throws Throwable
-     */
-    public function execute(Record $record): Record
-    {
-        DB::transaction(function () use ($record): void {
-            $record->status->transitionTo(Archived::class);
-        });
-
-        return $record;
-    }
-}
-```
-
-## Why Outerweb likes this
-
-- The action is single purpose.
-- UI layers can call it without knowing implementation details.
-- The transaction boundary is explicit.
-- The method name `execute()` is consistent across actions.
+The approved feature, installed versions, maintained project conventions, and `outerweb-laravel-architecture` determine the implementation. This structural reference does not authorize new tests, dependencies, or scope. No concrete mutation is shown because an invented operation would imply business rules or package APIs that may not fit the project.

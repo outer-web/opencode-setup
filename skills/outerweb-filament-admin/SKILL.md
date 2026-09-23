@@ -8,66 +8,99 @@ metadata:
 
 # Outerweb Filament Admin
 
-Use this skill for Filament work, especially Filament v5 projects.
+Use this skill for Filament work after discovering the target project's installed
+stack and established conventions.
 
-## Structure
+## Start from project evidence
 
-- Follow the existing panel namespace, such as `app/Filament/Salon`.
-- Use generated-style split resources:
-  - `Resources/{Plural}/{Resource}.php`
-  - `Resources/{Plural}/Pages/*`
-  - `Resources/{Plural}/Schemas/*Form.php`
-  - `Resources/{Plural}/Schemas/*Infolist.php`
-  - `Resources/{Plural}/Tables/*Table.php`
-- Keep Resource classes thin and delegate to schema/table classes.
-- Put custom Filament actions in panel-specific `Actions` folders when the project does so.
-- Use `static make()` wrapper classes for reusable Filament actions.
+- Inspect Composer manifests and the lockfile for the installed Filament major,
+  related packages, and plugins before choosing APIs.
+- Inspect panel providers, configuration, sibling resources and pages, auth
+  setup, policies, tenancy, translations, date and time formatting, and
+  project-local guidance before designing the change.
+- Use documentation and APIs compatible with the detected package versions.
+  Do not infer that an API exists from a newer Filament release or from an
+  installed but unused plugin.
+- Follow the project's panel namespaces, directories, naming, and generator
+  output. Do not copy domain names or paths from examples.
+- Load `outerweb-golden-examples` only when a reference would help, and use its
+  Filament examples only when their structure, imports, and APIs are compatible
+  with the target project. Adapt structure rather than names or business logic.
 
-## Panels
+## Resources and panel structure
 
-- Inspect the panel provider before adding resources or auth behavior.
-- Respect configured guards, password brokers, tenants, colors, domains, paths, middleware, and Vite themes.
-- For tenant-aware panels, use `Filament::getTenant()` and existing tenant relationships.
-- Do not assume the default `User` model or `web` guard.
+- Choose inline or split resource definitions from sibling resources, project
+  generators, and the size of the feature. Do not impose split schema, table,
+  infolist, or page classes on a project that keeps them inline.
+- Keep resource and page classes focused. When the project uses split classes,
+  delegate to them consistently rather than mixing structures without a reason.
+- Inspect the panel provider before changing discovery, authentication,
+  middleware, navigation, domains, paths, assets, themes, or plugins.
+- Do not assume a default authenticatable model, guard, password broker, panel,
+  or plugin configuration.
 
-## Forms and schemas
+## Authorization and tenancy
 
-- Use `Filament\Schemas\Schema` and `Section` when the project uses Filament v5 schemas.
-- Labels should usually use translations, not hardcoded UI copy.
-- Put modifiers on new lines: `->nullable()`, `->required()`, `->unique()`, `->maxLength()`, etc.
-- Use enum option maps from enum methods like `supportedCases()` and `getLabel()`.
-- Put validation mutations close to the field when they are field-specific.
+- Treat policies and authorization checks as the security boundary. Hidden or
+  disabled navigation, fields, and actions improve presentation but do not
+  replace server-side authorization.
+- Authorize page access, records, and mutations with the project's policy and
+  guard conventions, including destructive and bulk operations.
+- Use the tenancy mechanism configured by the detected Filament version and
+  project. Scope resource queries, relation options, lookups, actions, and
+  mutations to the authorized tenant.
+- Never trust a tenant or record identifier merely because it came from route,
+  request, or component state. Reject cross-tenant access and preserve existing
+  tenant ownership and membership rules.
 
-## Tables
+## Forms, schemas, infolists, and tables
 
-- Make important columns searchable and sortable when useful.
-- Use `toggleable(isToggledHiddenByDefault: true)` for secondary columns.
-- Use `TextColumn::make(...)->isoDateTime()` for timestamps when matching project convention.
-- Use `ActionGroup` for secondary row actions and `BulkActionGroup` for bulk actions.
-- Use `modifyQueryUsing()` for eager loading and query constraints.
-- Default sorting should match the user workflow, not arbitrary `id` ordering.
+- Prefer Filament-native fields, layouts, infolist entries, table features,
+  actions, validation, and notifications before introducing custom components
+  or bespoke Livewire behavior.
+- Use component classes, method names, and action placement supported by the
+  installed Filament and plugin versions.
+- Keep field-specific validation and state transformations near the field when
+  that matches the project, while preserving domain invariants below the UI
+  boundary.
+- Build enum labels and options from the contracts, methods, casts, or mappings
+  the project actually provides. Do not assume a universal `supportedCases()`
+  helper.
+- Make useful columns searchable, sortable, filterable, or toggleable according
+  to the workflow and existing table density. Eager load deliberately and use
+  default sorting that supports the task.
+- Format dates and times with the project's timezone, locale, display format,
+  and compatible Filament APIs. Do not impose one timestamp helper or format.
 
-## Actions
+## Actions and workflows
 
-- Filament actions should delegate domain behavior to `app/Actions` classes.
-- Use action labels, modal labels, icons, colors, and notifications consistent with existing actions.
-- Use visibility rules based on policies, tenant access, or state transitions.
-- For complex create/edit flows, prefer wizard steps when it improves UX.
+- Load `outerweb-laravel-architecture` when deciding whether behavior belongs
+  in a Filament callback, model, domain service, or Action.
+- Extract a meaningful named business operation when it is reused, coordinates
+  effects, owns atomicity or concurrency, or follows an established project
+  pattern. Do not create pass-through Actions for simple component-local work.
+- Follow the project's Action location and invocation convention rather than
+  requiring a fixed directory or wrapper shape.
+- Keep validation and authorization at the appropriate boundary before invoking
+  domain behavior. Keep labels, modals, icons, notifications, visibility, and
+  post-action navigation consistent with sibling Filament actions.
 
-## Custom components
+## Language and interface quality
 
-- Use custom schema/form components only when built-ins cannot express the interaction clearly.
-- Keep Livewire exposed methods renderless when the UI state can be updated without full render.
-- In Blade components, support responsive and dark-mode behavior when the surrounding UI does.
-- Avoid generic AI-looking layouts; preserve the panel's visual language.
-
-## Translations
-
-- Prefer `lang/{locale}/filament.php` or existing translation files for Filament copy.
-- Add both English and Dutch copy when the project has both locales.
-- Avoid hardcoded labels unless the surrounding project already hardcodes that specific area.
+- Put Filament copy in the project's existing translation structure when that
+  is the established convention, and update every locale configured for the
+  affected interface. Do not assume a particular language or locale pair.
+- Preserve the panel's established visual hierarchy, spacing, density, and
+  interaction patterns. Support its responsive layouts and dark mode where
+  applicable.
+- Preserve accessible labels, descriptions, focus behavior, keyboard use,
+  contrast, and error communication. Use custom Blade or Livewire components
+  only when native Filament components cannot express the required interaction.
 
 ## Testing rule
 
-- Do not create or update Filament tests until the human approves the working version or explicitly asks for tests.
-- After approval, use the `outerweb-pest-workflow` skill and cover page load, table columns, search, sorting, filters, actions, policies, validation, notifications, redirects, and persistence.
+Do not create or update Filament tests based on an initial request for tests.
+The sole authorization is the user's explicit approval, given after they review
+the implemented working feature. After that approval, load
+`outerweb-pest-workflow` for the applicable Filament test strategy and execution
+safeguards.

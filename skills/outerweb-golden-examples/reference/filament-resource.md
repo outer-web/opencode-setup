@@ -2,93 +2,34 @@
 
 ## When to use
 
-Use this shape for Filament resources in projects that split resources into pages, schemas, and tables.
+Use this structural sketch only when the approved feature, installed Filament version, and sibling/project conventions support a split resource. It is not copy-ready: choose the project's model, namespace, imports, routes, and compatible APIs from version-matched documentation. The `Filament\Schemas\Schema` API illustrated below is not for Filament 3.
 
-## Pattern to copy
+## Structural sketch
 
-- Resource class stays thin.
-- Form, infolist, and table delegate to dedicated classes.
-- Labels come from translations.
-- `#[Override]` is used for overridden Filament methods/properties when the project uses it.
+- Keep the resource thin by delegating form and table configuration where split classes are maintained.
+- Add an infolist and create/view/edit pages only when the feature needs them and the installed API and project structure support them. Register only the needed pages and routes using project conventions.
+- Follow the project's language and configuration for labels; translations are not unconditional.
+- Routes and visibility are not authorization. Apply the project's policies, guard, and tenancy boundaries.
 
 ```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Filament\Admin\Resources\Records;
-
-use App\Filament\Admin\Resources\Records\Pages\CreateRecord;
-use App\Filament\Admin\Resources\Records\Pages\EditRecord;
-use App\Filament\Admin\Resources\Records\Pages\ListRecords;
-use App\Filament\Admin\Resources\Records\Pages\ViewRecord;
-use App\Filament\Admin\Resources\Records\Schemas\RecordForm;
-use App\Filament\Admin\Resources\Records\Schemas\RecordInfolist;
-use App\Filament\Admin\Resources\Records\Tables\RecordsTable;
-use App\Models\Record;
-use BackedEnum;
-use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Table;
-use Override;
-
+// Illustrative only: resolve symbols, signatures, and paths against the target project.
 class RecordResource extends Resource
 {
-    #[Override]
     protected static ?string $model = Record::class;
 
-    #[Override]
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
-    #[Override]
-    protected static ?string $recordTitleAttribute = 'name';
-
-    #[Override]
-    public static function getModelLabel(): string
-    {
-        return __('filament.resources.records.label');
-    }
-
-    #[Override]
-    public static function getPluralModelLabel(): string
-    {
-        return __('filament.resources.records.plural_label');
-    }
-
-    #[Override]
     public static function form(Schema $schema): Schema
     {
         return RecordForm::configure($schema);
     }
 
-    #[Override]
-    public static function infolist(Schema $schema): Schema
-    {
-        return RecordInfolist::configure($schema);
-    }
-
-    #[Override]
     public static function table(Table $table): Table
     {
         return RecordsTable::configure($table);
-    }
-
-    #[Override]
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListRecords::route('/'),
-            'create' => CreateRecord::route('/create'),
-            'view' => ViewRecord::route('/{record}'),
-            'edit' => EditRecord::route('/{record}/edit'),
-        ];
     }
 }
 ```
 
 ## Why Outerweb likes this
 
-- Resource classes remain readable.
-- Form/table/infolist concerns are easy to test and evolve.
-- Translations are built in from the start.
+- Resource classes remain readable when delegation matches the maintained project structure.
+- Form and table concerns stay separate without implying extra pages, infolists, or authorization.

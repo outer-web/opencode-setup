@@ -2,49 +2,30 @@
 
 ## When to use
 
-Use this shape for Filament v5 schema classes.
+Use this structural sketch only when the approved feature, installed Filament
+version, and project conventions support a split form schema. It is not
+copy-ready: verify the `Schema` and `Section` APIs against the installed version.
+The feature and actual auth/tenancy boundaries determine fields, labels and
+translations, validation and persistence constraints, relationship options,
+and tenant access; this example supplies none of those decisions.
+
+## Structural sketch
 
 ```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Filament\Admin\Resources\Records\Schemas;
-
-use App\Enums\Locale;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
-class RecordForm
+class ExampleForm
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->columns(1)
             ->components([
                 Section::make()
                     ->schema([
-                        TextInput::make('first_name')
-                            ->label(__('filament.forms.labels.first_name'))
-                            ->required()
-                            ->maxLength(255),
-                        TextInput::make('email')
-                            ->label(__('filament.forms.labels.email'))
-                            ->email()
-                            ->nullable()
-                            ->maxLength(255)
-                            ->unique(ignoreRecord: true),
-                        Select::make('locale')
-                            ->label(__('filament.forms.labels.locale'))
-                            ->required()
-                            ->options(
-                                collect(Locale::supportedCases())
-                                    ->mapWithKeys(function (Locale $locale): array {
-                                        return [$locale->value => $locale->getLabel()];
-                                    })
-                            ),
+                        TextInput::make('example')
+                            ->label('Example label'),
                     ]),
             ]);
     }
@@ -53,6 +34,5 @@ class RecordForm
 
 ## Why Outerweb likes this
 
-- Modifier chains are readable.
-- Labels are translated.
-- Enum options come from the enum instead of duplicated arrays.
+- A split form stays focused when the project uses split schemas.
+- Chained modifiers remain readable without implying field or validation defaults.

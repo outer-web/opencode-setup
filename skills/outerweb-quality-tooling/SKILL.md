@@ -1,6 +1,6 @@
 ---
 name: outerweb-quality-tooling
-description: Use when working in Laravel projects with composer.json, PHPStan, Pint, Rector, Pest, Laravel Boost, Barryvdh IDE Helper, composer clean-code, or pre-commit hooks. Adds and maintains Outerweb quality scripts and hooks.
+description: Use for evidence-first inspection and safe use of installed Laravel/PHP quality tooling, or to prepare an exact separately approved tooling proposal.
 license: MIT
 metadata:
   owner: Outerweb
@@ -8,154 +8,179 @@ metadata:
 
 # Outerweb Quality Tooling
 
-Use this skill whenever a Laravel project needs tooling inspection, setup, maintenance, or post-change verification.
+Use this skill to inspect and safely run the quality tooling a Laravel/PHP
+project actually maintains. Loading it authorizes investigation and an exact
+proposal, not installation, configuration, generation, or activation.
 
-## Core workflow
+## Evidence and precedence
 
-- Inspect `composer.json` before choosing commands.
-- Prefer project Composer scripts over raw vendor binaries.
-- Always run `composer clean-code` after PHP/code changes when present.
-- If `composer clean-code` is missing in a Laravel project, add the standard Outerweb Composer scripts automatically.
-- If an expected script already exists with different behavior, do not overwrite silently. Ask first and explain the difference.
-- After editing `composer.json`, run `composer validate`.
-- Never hand-edit generated IDE helper files such as `_ide_helper.php`, `_ide_helper_models.php`, or `.phpstorm.meta.php`.
-- Regenerate IDE helper output through `composer ide-helper` or `composer clean-code`.
+Before proposing or running a command, inspect only as deeply as the task needs:
 
-## Standard dev packages
+- applicable `AGENTS.md`, project OpenCode instructions, `.ai/guidelines`, the
+  relevant `.ai/rules`, and package-specific guidance;
+- worktree status and relevant existing diffs so pre-existing work remains
+  identifiable and preserved;
+- `composer.json`, `composer.lock`, installed versions, Composer plugins, and
+  whether each relevant package is a direct or transitive dependency;
+- the exact definitions of relevant Composer scripts, every referenced alias or
+  subcommand, and applicable install, update, or other lifecycle hooks;
+- maintained PHPStan/Larastan, Pint, Rector, Pest/PHPUnit, Laravel Boost, and IDE
+  Helper configuration, bootstrap, includes, paths, exclusions, baselines,
+  generated targets, and wrappers; and
+- the actual Git-hook mechanism, including tracked hook sources, installation
+  scripts, configured hook paths, local hooks, and relevant CI enforcement.
 
-Outerweb Laravel projects should normally include these dev tools:
+Project guidance and maintained project configuration control. Follow their
+configured versions, paths, scripts, rule sets, thresholds, and generated-file
+policy instead of imposing a generic Outerweb template. Resolve conflicting
+signals before acting and report any material conflict. A missing package,
+script, hook, lifecycle entry, generated file, or configuration file is not
+permission to create it.
 
-- `barryvdh/laravel-ide-helper`
-- `larastan/larastan`
-- `laravel/boost`
-- `laravel/pint`
-- `pestphp/pest`
-- `pestphp/pest-plugin-laravel`
-- `rector/rector`
-- `driftingly/rector-laravel`
+## Change and approval boundary
 
-Ask before installing missing packages. Do not add dependencies silently.
+- Never opportunistically add, remove, update, or reclassify a package or tool;
+  create or alter a script, hook, lifecycle entry, configuration, or generated
+  file; or install or activate a hook.
+- Feature approval is not tooling approval. Before any tooling change, obtain
+  separate explicit approval for the exact package constraints and
+  classification, commands, files, generated effects, script or hook behavior,
+  lifecycle side effects, and compatibility implications.
+- In delegated mode, act only on the Project Manager's record of that exact user
+  approval. In direct mode, obtain it from the user. If solver output or later
+  inspection materially changes the proposal, stop for renewed approval.
+- Route dependency evaluation through `outerweb-package-selection`. Never
+  hand-edit a generated lockfile. Validate an approved Composer manifest or
+  lockfile change with `composer validate` and inspect all resulting changes.
 
-## Standard Composer scripts
+## Safe command selection
 
-When missing, add these scripts to `composer.json` without removing existing scripts:
+Inspect a script recursively before execution. Establish what every subcommand
+does, which files it can rewrite, whether it invokes a formatter, refactor,
+generator, test, package-manager operation, plugin, or lifecycle event, whether
+it boots the application, and whether it can reach persistent data, external
+services, or unrelated paths.
 
-```json
-{
-  "test": [
-    "@php artisan config:clear --ansi",
-    "@php vendor/bin/pest --parallel --coverage --min=100 --exclude-group=browser --exclude-group=stress"
-  ],
-  "test-unit": [
-    "@php artisan config:clear --ansi",
-    "@php vendor/bin/pest --parallel --group=unit"
-  ],
-  "test-feature": [
-    "@php artisan config:clear --ansi",
-    "@php vendor/bin/pest --parallel --group=feature"
-  ],
-  "test-arch": [
-    "@php artisan config:clear --ansi",
-    "@php vendor/bin/pest --parallel --group=arch"
-  ],
-  "test-stress": [
-    "@php artisan config:clear --ansi",
-    "@php vendor/bin/pest --parallel --group=stress"
-  ],
-  "test-browser": [
-    "@php artisan config:clear --ansi",
-    "@php vendor/bin/pest --parallel --group=browser"
-  ],
-  "setup-git-hooks": [
-    "cp -f scripts/pre-commit .git/hooks/pre-commit",
-    "chmod +x .git/hooks/pre-commit"
-  ],
-  "ide-helper": [
-    "@php artisan ide-helper:generate",
-    "@php artisan ide-helper:meta",
-    "@php artisan ide-helper:models -N --reset"
-  ],
-  "refactor": [
-    "@php vendor/bin/rector",
-    "@php vendor/bin/pint --parallel"
-  ],
-  "analyse": [
-    "@php vendor/bin/phpstan analyse"
-  ],
-  "clean-code": [
-    "@composer refactor",
-    "@composer analyse",
-    "@composer ide-helper"
-  ]
-}
-```
+- Prefer a maintained project script only when its inspected behavior is safe
+  for the current phase and scope. A direct installed command can be safer when
+  a wrapper contains unrelated or mutating work.
+- Run `composer clean-code` after PHP changes only when every nested command has
+  been inspected and proven installed, in scope, and safe in the current phase.
+  It must not author or rewrite protected tests, alter unapproved tooling or
+  setup, install dependencies, invoke unsafe lifecycle behavior, generate
+  unapproved output, or mutate persistent data or external systems. This is the
+  controlling quality-tooling condition wherever broader routing text says to
+  run a defined `clean-code` script.
+- If that proof is incomplete, do not run `composer clean-code`. Run only the
+  narrow installed checks or supported dry runs whose safety is established,
+  and report the omitted command and subchecks with the reason.
+- Start with the narrowest relevant files or targets, then broaden only as
+  proportionate verification requires. Record the command, scope, result,
+  omissions, and every file it changed.
+- Never issue a direct migration or other persistent-data mutation command.
+  Test-runner-managed schema work is allowed only under the independently
+  proven isolation rules in `outerweb-pest-workflow`.
+- Never weaken analysis, formatting, refactoring, validation, authorization,
+  type-safety, test, or coverage rules merely to make a check pass.
 
-## Composer lifecycle scripts
+Before a mutating tool runs, preserve scoped pre-run evidence sufficient to
+distinguish its output from existing work. Inspect every changed file afterward.
+If reversal is needed, restore only tool-attributable changes from that recorded
+evidence; never overwrite unrelated work or use destructive Git cleanup.
 
-- If `post-update-cmd` exists, ensure it includes `@php artisan boost:update --ansi` when Laravel Boost is installed.
-- Ensure `post-update-cmd` includes `@composer setup-git-hooks` when the standard hook is present.
-- Ensure `post-update-cmd` includes `@composer refactor` and `@composer ide-helper` when the tools are installed.
-- If `post-update-cmd` exists with different entries, append missing entries without removing existing ones.
-- If a conflicting behavior exists, ask before changing it.
+## Tool-specific guidance
 
-## Standard pre-commit hook
+### PHPStan and Larastan
 
-When missing in a Laravel project where code changes are requested:
+- Inspect the maintained configuration chain, bootstrap, extensions, analysed
+  paths, exclusions, baseline or ignored errors, and the installed versions
+  before selecting a command.
+- Use the project's configured analysis level and rules. Prefer the narrowest
+  supported relevant target before the configured broader analysis.
+- Correct code findings within scope. Do not lower the level, broaden ignores,
+  extend a baseline, or remove an extension to obtain a pass.
 
-- Create `scripts/pre-commit` with the standard hook below.
-- Add `setup-git-hooks` to Composer scripts if missing.
-- Add `@composer setup-git-hooks` to `post-update-cmd` if missing.
-- If the project has a `.git` directory, run `composer setup-git-hooks` after writing the file.
-- If `scripts/pre-commit` already exists but differs, do not overwrite silently. Ask first.
+### Pint
 
-Use the emoji version exactly:
+- Inspect the project's Pint configuration or preset, exclusions, script
+  options, and targeted-file support. The maintained project style controls.
+- Prefer a supported check-only mode for verification. Run a mutating format
+  only against attributable in-scope files, then inspect every edit; never
+  replace project rules with a universal ruleset.
 
-```sh
-#!/bin/sh
+### Rector
 
-echo "🔍 Running clean-code..."
+- Inspect the installed Rector and integration versions, configuration, sets,
+  bootstrap, skips, configured paths, and Composer wrapper before use.
+- Begin with the supported dry-run and narrowest relevant configured target.
+  Apply changes only when the current implementation scope authorizes the
+  refactor, and manually review every transformation.
 
-# Run your composer script
-composer clean-code
-EXIT_CODE=$?
+### IDE Helper
 
-if [ $EXIT_CODE -ne 0 ]; then
-  echo "❌ clean-code failed. Commit aborted."
-  exit 1
-fi
+- Inspect the installed package, maintained configuration, exact Artisan or
+  Composer wrapper, model-inspection behavior, generated targets, and project
+  tracking policy. Never infer that `clean-code` invokes IDE Helper.
+- Never hand-edit generated helper output. Generation is a mutating tooling
+  change, not a validation step; run it only when its exact files and side
+  effects are approved and safe, then inspect every generated diff.
 
-# Check if any files were modified (Rector, Pint, etc.)
-if ! git diff --quiet; then
-  echo "⚠️ clean-code made changes."
-  echo "👉 Please review and re-stage your files."
-  exit 1
-fi
+### Laravel Boost
 
-echo "✅ Code is clean. Proceeding with commit."
-exit 0
-```
+- Detect Boost from the manifest and lockfile, then inspect maintained Boost
+  configuration, available MCP capabilities, scripts, and lifecycle entries.
+  Use version-matched documentation and observational capabilities only when
+  relevant.
+- Do not assume Boost is installed or prescribe a version. Never install,
+  update, configure, generate, or record guidance through Boost, or invoke a
+  Boost lifecycle command, without exact approval and inspected side effects.
+  Do not use mutating runtime capabilities as quality checks.
 
-## PHPStan
+## Hooks
 
-- Outerweb uses PHPStan/Larastan at max level: `level: 10`.
-- Prefer a minimal `phpstan.neon` with Larastan and Carbon extensions when present.
-- Fix PHPStan findings in code instead of weakening rules.
+- Detect the project's real hook mechanism and deployment path before proposing
+  anything. Do not prescribe a universal hook file or installation template.
+- Inspect every command a hook can call. A hook must preserve and return the
+  exact failing command status without masking failures through pipelines,
+  command chaining, or later successful commands.
+- Base decisions on command exit status and scoped file evidence, not fragile
+  parsing of human-readable output. Do not attribute a whole dirty worktree to
+  the hook or tool; distinguish pre-existing, staged, unstaged, and generated
+  changes within the relevant scope.
+- Editing a tracked hook, changing its installer, selecting a hook path, and
+  installing or activating it are separate side effects that require inclusion
+  in the exact approved proposal.
 
-## Pint
+## Pest and test tooling
 
-- Outerweb uses Laravel Pint with strict rules such as `declare_strict_types`, `strict_comparison`, `ordered_class_elements`, `global_namespace_import`, and `Pint/phpdoc_type_annotations_only`.
-- Do not manually fight Pint formatting. Run the script and accept its style unless it conflicts with project-specific code.
+`outerweb-pest-workflow` is canonical for test authoring, Pest and Drift,
+browser coverage, test-tooling approval, database and external-side-effect
+isolation, execution, and completion. Its rules override summaries here:
 
-## Rector
+- Do not create or modify tests until the human has reviewed the implementation
+  and explicitly approved post-implementation test work. The same original
+  developer owns the approved test phase.
+- Use Pest functional style for newly authored Laravel, Livewire, Filament, and
+  browser tests. Drift conversion remains post-approval, requires separately
+  approved tooling and the smallest exact current-feature scope, and never
+  permits opportunistic project-wide conversion.
+- Relevant browser behavior requires the canonical real-browser Pest coverage;
+  Boost, Playwright, or manual checks do not replace it.
+- Installing or changing Pest, Drift, plugins, browser binaries, scripts,
+  bootstrap, configuration, manifests, or lockfiles requires separate exact
+  tooling approval and project-compatible constraints.
+- Inspect each test command and independently prove disposable database,
+  application, and external-side-effect isolation before running it. Meet
+  project-enforced coverage thresholds; never impose a blanket percentage.
 
-- Use Rector for automated refactors.
-- Laravel projects should use Rector Laravel sets when available.
-- Do not add broad Rector changes unrelated to the requested task unless `composer clean-code` makes them.
+OpenCode agent-, skill-, and configuration-only changes retain their approved
+no-authored-test exception and use static/runtime validation plus final review.
+That exception never extends to application code, scripts, hooks, generators,
+commands, or any other executable behavior.
 
-## Testing rule
+## Reporting
 
-Outerweb testing workflow overrides Laravel Boost:
-
-- Do not create, update, or run new tests for implementation work until the human validates the working version or explicitly requests tests.
-- Quality tools still run immediately. `composer clean-code` is not optional.
-- After human approval, prompt to add Pest tests.
+Report the inspected project controls; exact commands and scopes; pass, failure,
+and omission results; changed or generated files; attribution limits; and any
+approval, compatibility, isolation, or safety blocker. Do not claim a broad
+quality pass when only targeted checks ran.

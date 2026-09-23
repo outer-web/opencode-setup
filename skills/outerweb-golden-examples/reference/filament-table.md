@@ -2,91 +2,29 @@
 
 ## When to use
 
-Use this shape for Filament tables with searchable columns, filters, grouped actions, eager loading, and sensible sorting.
+Use this split-table shape only when the installed Filament API and the project's resource structure support it. The paired `enabled` column and filter assume an illustrative boolean field; replace or omit both if the schema differs. This is not copy-ready: resolve the namespace, model fields, imports, translations, timezone/date formatting, guard, tenancy, and query conventions from the project.
 
 ```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Filament\Admin\Resources\Records\Tables;
-
-use App\Models\Record;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\TernaryFilter;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-
 class RecordsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('name')
-                    ->label(__('filament.tables.columns.name'))
-                    ->sortable()
-                    ->searchable(),
-                TextColumn::make('email')
-                    ->label(__('filament.tables.columns.email'))
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->sortable()
-                    ->searchable(),
-                TextColumn::make('status')
-                    ->label(__('filament.tables.columns.status'))
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->sortable(),
-                TextColumn::make('created_at')
-                    ->isoDateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('name'),
+                TextColumn::make('enabled'),
+                // Add columns and modifiers only for real fields and useful workflows.
             ])
             ->filters([
-                TernaryFilter::make('is_active')
-                    ->label(__('filament.tables.filters.is_active'))
-                    ->queries(
-                        /** @param Builder<Record> $query */
-                        true: function (Builder $query): void {
-                            $query->whereNotNull('activated_at');
-                        },
-                        /** @param Builder<Record> $query */
-                        false: function (Builder $query): void {
-                            $query->whereNull('activated_at');
-                        },
-                    ),
-            ])
-            ->recordActions([
-                ViewAction::make()
-                    ->iconButton(),
-                EditAction::make()
-                    ->iconButton(),
-                ActionGroup::make([
-                    DeleteAction::make(),
-                ]),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ])
-            /** @param Builder<Record> $query */
-            ->modifyQueryUsing(function (Builder $query): void {
-                $query->with('owner');
-            })
-            ->defaultSort('name', 'asc');
+                TernaryFilter::make('enabled'),
+            ]);
     }
 }
 ```
 
 ## Why Outerweb likes this
 
-- Secondary columns are available but hidden by default.
-- Row actions stay compact.
-- Query eager loading is explicit.
-- Filter closures are typed for PHPStan.
+- Add search, toggle visibility, filters, and default sorting only when they serve the workflow and workload; a hidden column is not access control. Match each filter's name and meaning to the field or explicit query it actually uses.
+- Eager load only relationships the table reads. On large data sets, check indexes and query plans for search, filtering, sorting, and relationship access; add a table query modifier only when the project needs one. A table query modifier alone does not secure other resource entry points.
+- Add row or bulk actions, especially destructive actions, only when project-approved. Enforce server-side authorization with the project's guard and policies, tenant-safe record selection, and correct per-record and bulk policy handling; UI visibility is not authorization.
+- Use typed filter or query callbacks only when the installed Filament version accepts their signatures. Use the project's configured translation and date/time conventions rather than fixed keys, locales, or formats.

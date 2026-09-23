@@ -2,50 +2,41 @@
 
 ## When to use
 
-Use this shape for Filament infolists with contextual callouts and grouped entries.
+Use this structural sketch only when the approved feature, installed Filament
+version, and project conventions support a split infolist and a contextual
+callout. Verify the `Schema`, `Callout`, `Section`, and `TextEntry` APIs against
+the installed version. Fields, translations, layout, callout content, and data
+visibility must come from the feature and project; this example does not define
+authorization or relationship loading.
+
+## Structural sketch
 
 ```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Filament\Admin\Resources\Records\Schemas;
-
-use App\Models\Record;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
 
-class RecordInfolist
+class ExampleInfolist
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema
             ->columns(1)
             ->components([
-                Callout::make(function (Record $record): string {
-                    if ($record->isVerified()) {
-                        return __('filament.infolists.callouts.record_verified.title');
-                    }
-
-                    return __('filament.infolists.callouts.record_unverified.title');
-                })
-                    ->description(function (Record $record): string {
-                        if ($record->isVerified()) {
-                            return __('filament.infolists.callouts.record_verified.description');
-                        }
-
-                        return __('filament.infolists.callouts.record_unverified.description');
-                    })
+                Callout::make(fn (Model $record): string => __('Viewing details for :name', [
+                    'name' => $record->getAttribute('name'),
+                ]))
+                    ->description(__('Review the fields below.'))
                     ->info(),
                 Section::make()
                     ->columns(2)
                     ->schema([
                         TextEntry::make('name')
-                            ->label(__('filament.infolists.entries.name')),
-                        TextEntry::make('email')
-                            ->label(__('filament.infolists.entries.email')),
+                            ->label(__('Name')),
+                        TextEntry::make('summary')
+                            ->label(__('Summary')),
                     ]),
             ]);
     }
@@ -54,6 +45,9 @@ class RecordInfolist
 
 ## Why Outerweb likes this
 
-- Contextual messaging is close to the display schema.
-- Layout is explicit and simple.
-- UI text is translated.
+- Record-context messaging stays close to the displayed fields, without
+  implying a business status or a relationship lookup.
+- Layout is explicit and illustrative; use the project's field, translation,
+  and visibility conventions instead of copying these choices.
+- The informational callout communicates neutral context, not an authorization
+  decision.

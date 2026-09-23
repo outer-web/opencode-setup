@@ -2,14 +2,15 @@
 
 ## When to use
 
-Use this shape for Eloquent models with factory attributes, policy attributes, relations, scopes, and casts.
+Use this as a small structural illustration for an Eloquent model, not a paste-ready or universal implementation. `outerweb-model-lifecycle`, installed versions, and the actual project schema, auth topology, seeder registration, mass-assignment strategy, and strictness settings control the real model. This example does not authorize tests, dependencies, or extra scope.
 
 ## Pattern to copy
 
-- PHPStan generics for relations.
-- Attribute-based factory, policy, observer, and scopes when the project uses them.
-- Mandatory casts PHPDoc directly above `casts()`.
-- `#[Override]` on `casts()`.
+- Keep strict typing, concrete relation return types, and generics compatible with the installed static analyzer and actual related model.
+- A typed scope is optional; its column and implementation must match the project schema and supported framework API.
+- Keep the `casts()` array-shape PHPDoc's keys and literal values exactly in sync with the implementation.
+- Factory, policy, and observer attributes are conditional on their companion classes, installed APIs, and project conventions; `#[Override]` is conditional on language support and project convention. Do not introduce an observer as a default.
+- Every new model still requires a model, migration, factory, seeder, and policy unless the user explicitly narrows that model's scope. Existing omissions do not override this requirement. Connect the artifacts through the project's supported mechanisms.
 
 ```php
 <?php
@@ -18,37 +19,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\Locale;
-use App\Observers\RecordObserver;
-use App\Policies\RecordPolicy;
-use Database\Factories\RecordFactory;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Attributes\UseFactory;
-use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Override;
 
-#[ObservedBy([RecordObserver::class])]
-#[UseFactory(RecordFactory::class)]
-#[UsePolicy(RecordPolicy::class)]
 class Record extends Model
 {
-    /** @use HasFactory<RecordFactory> */
-    use HasFactory;
-
-    /**
-     * @return BelongsTo<Team, $this>
-     */
-    public function team(): BelongsTo
-    {
-        return $this->belongsTo(Team::class);
-    }
-
     /**
      * @return HasMany<RecordItem, $this>
      */
@@ -57,30 +33,22 @@ class Record extends Model
         return $this->hasMany(RecordItem::class);
     }
 
-    public function isLocked(): bool
-    {
-        return filled($this->locked_at);
-    }
-
+    // Optional: only when the project's schema has this column.
     /** @param Builder<Record> $query */
-    #[Scope]
-    protected function whereUnlocked(Builder $query): void
+    public function scopeEnabled(Builder $query): void
     {
-        $query->whereNull('locked_at');
+        $query->where('is_enabled', true);
     }
 
     /**
      * @return array{
-     *     locked_at: 'datetime',
-     *     locale: 'App\\Enums\\Locale',
+     *     is_enabled: 'boolean',
      * }
      */
-    #[Override]
     protected function casts(): array
     {
         return [
-            'locked_at' => 'datetime',
-            'locale' => Locale::class,
+            'is_enabled' => 'boolean',
         ];
     }
 }
@@ -88,7 +56,6 @@ class Record extends Model
 
 ## Why Outerweb likes this
 
-- PHPStan can understand relations and casts.
-- Model metadata is visible through attributes.
-- Scopes are typed.
-- The casts PHPDoc prevents static analysis drift.
+- Concrete relation types and compatible generics help static analysis understand relations.
+- The casts PHPDoc helps detect drift; it does not prevent drift automatically. Keep it synchronized when a cast changes.
+- An existing `Model::unguard()` is observational project evidence, never a reason to introduce it. Follow the project's mass-assignment and strictness choices instead of copying this example as a default.
